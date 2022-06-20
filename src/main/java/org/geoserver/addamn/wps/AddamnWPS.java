@@ -63,9 +63,10 @@ public class AddamnWPS implements GeoServerProcess {
 				// Each new Feature hav the intiale properties plus the newAttr call in createFeatureBuilder
 				SimpleFeature newFeature = geojsonUtil.newFeature(geojsonFeature);
 				layers.getAll().forEach(layer -> { // For each Layer in configuration file
+					FeatureIterator<? extends Feature> layerIt = null;
 					try {
 						FeatureCollection<? extends FeatureType, ? extends Feature> layerFeatures = getFeatureCollectionByLayerName(this.catalog, layer.getLayerName());
-						FeatureIterator<? extends Feature> layerIt = layerFeatures.features();
+						layerIt = layerFeatures.features();
 						CoordinateReferenceSystem layerCRS = layerFeatures.getSchema().getCoordinateReferenceSystem();
 						MathTransform transform = CRS.findMathTransform(geojsonCRS, layerCRS);
 						Geometry geojsonGeom = (Geometry) geojsonFeature.getDefaultGeometry();
@@ -99,6 +100,10 @@ public class AddamnWPS implements GeoServerProcess {
 					} catch (TransformException e) {
 						logger.log(Level.SEVERE, "Error on reproject geojson geom to crs layer source", e);
 						throw new WPSException("Error on reproject geojson geom to crs layer source", e);
+					} finally {
+						if (!Objects.isNull(layerIt)) {
+							layerIt.close();
+						}
 					}
 				});
 			}
