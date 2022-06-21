@@ -24,6 +24,8 @@ import java.util.List;
 import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
+import java.util.stream.Collectors;
+
 import org.locationtech.jts.geom.Geometry;
 import org.opengis.feature.Feature;
 import org.opengis.feature.simple.SimpleFeature;
@@ -90,7 +92,7 @@ public class AddamnWPS implements GeoServerProcess {
 								}
 							}
 						}
-						newFeature.setAttribute(layer.getLayerName(), organismes); // Set the list of intersects organismes
+						newFeature.setAttribute(layer.getLayerName(), organismes.stream().distinct().collect(Collectors.toList())); // Set the list of intersects organismes
 					} catch (IOException e) {
 						logger.log(Level.SEVERE, "Cannot get features layer source from layerName config", e);
 						throw new WPSException("Cannot get features layer source from layerName config", e);
@@ -100,7 +102,7 @@ public class AddamnWPS implements GeoServerProcess {
 					} catch (TransformException e) {
 						logger.log(Level.SEVERE, "Error on reproject geojson geom to crs layer source", e);
 						throw new WPSException("Error on reproject geojson geom to crs layer source", e);
-					} finally {
+					}finally {
 						if (!Objects.isNull(layerIt)) {
 							layerIt.close();
 						}
