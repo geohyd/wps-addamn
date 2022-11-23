@@ -2,6 +2,8 @@ package org.geoserver.addamn.wps.config;
 
 import java.util.ArrayList;
 import java.util.List;
+import java.util.Objects;
+import java.util.stream.Collectors;
 
 public class LayersConfig {
 	/**
@@ -10,13 +12,6 @@ public class LayersConfig {
 	 */
 	private List<LayerConfig> layersList = new ArrayList<LayerConfig>();
 	
-	/**
-	 * I
-	 */
-//	protected LayersConfig(){
-//		this.layersList = new ArrayList<LayerConfig>();
-//    }
-
 	/**
 	 * Add a LayerConfig to the list
 	 * @param layer a LayerConfig
@@ -32,5 +27,31 @@ public class LayersConfig {
     public List<LayerConfig> getAll() {
     	// TODO : Implement an Iterator instead this ?
     	return this.layersList;
+    }
+    
+    public LayerConfig getLayer(String layerName) {
+    	return layersList.stream()
+    			.filter(layer -> layer.getLayerName().equalsIgnoreCase(layerName))
+    			.findFirst()
+    			.orElse(null);
+    }
+    
+    public String getTitleLayer(String layerName) {
+    	LayerConfig layerConfig = layersList.stream()
+			.filter(layer -> layer.getLayerName().equalsIgnoreCase(layerName))
+			.findFirst()
+			.orElse(null);
+    	if (Objects.isNull(layerConfig) ){  
+    		return "";
+    	}else {
+    		return layerConfig.getLayerTitle();
+    	}
+    }
+    
+    public void filter(List<String> layersFilters) {
+    	this.layersList = 
+    			layersList.stream()
+    					.filter(layer -> layersFilters.contains(layer.getLayerName()))
+    		           .collect(Collectors.toList());
     }
 }

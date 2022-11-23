@@ -12,6 +12,7 @@ import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerExtensions;
 import com.thoughtworks.xstream.XStream;
+import org.geoserver.addamn.wps.config.LayersConfig;
 
 public class ConfigLoader {
 	/**
@@ -73,8 +74,8 @@ public class ConfigLoader {
 		xstream.alias("layers", LayersConfig.class);
 		xstream.addImplicitCollection(LayersConfig.class, "layersList");
 		LayersConfig list = new LayersConfig();
-		list.add(new LayerConfig("layerName","organismeColumn"));
-		list.add(new LayerConfig("layerName","organismeColumn"));
+		list.add(new LayerConfig("layerName","organismeColumn","idColumn"));
+		list.add(new LayerConfig("layerName","organismeColumn","idColumn"));
 		String xml = xstream.toXML(list);
 		fw.write(xml);
 		fw.flush();

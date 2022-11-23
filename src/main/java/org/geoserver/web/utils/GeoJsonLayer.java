@@ -23,7 +23,7 @@ import org.opengis.referencing.NoSuchAuthorityCodeException;
 import org.opengis.referencing.crs.CRSAuthorityFactory;
 import org.opengis.referencing.crs.CoordinateReferenceSystem;
 
-public class GeoJson  implements Iterator<Feature>{
+public class GeoJsonLayer{
 	/**
 	 * GeoJson class read a RawData GeoJson (or InputStream) from the input WPS argument
 	 * Implement an Iterator for loop over all Feature of GeoJson
@@ -32,62 +32,19 @@ public class GeoJson  implements Iterator<Feature>{
 	 */
 
 	private FeatureCollection featureCollection;
-	private SimpleFeatureTypeBuilder ftBuilder;
 	private List<SimpleFeature> newFeatures;
-	private SimpleFeatureType nSchema;
 	private FeatureIterator fIterator = null;
+	private String name = null;
 	
-	@Override
-	public boolean hasNext() {
-		if (Objects.isNull(fIterator)) {
-			fIterator = featureCollection.features();
-		}
-		return fIterator.hasNext();
-	}
+    public void initList() {
+        this.newFeatures = new ArrayList<>();
+    }
 
-	@Override
-	public Feature next() {
-		return fIterator.next();
+	public void setName(String name){
+		this.name = name;
 	}
-	
-	public void resetIterator() {
-		fIterator = featureCollection.features();
-	}
-
-	/**
-	 * Read a geojson RawData
-	 * @param geojson A RawData reference to geojson
-	 * @throws IOException if getInputStream doesn't work on the RawData or a readFeatureCollection error
-	 */
-	public void readGeoJson(RawData geojson) throws IOException {
-		this.readGeoJson(geojson.getInputStream());
-	}
-
-	/**
-	 * Read a geojson InputStream
-	 * @param geojson A InputStream reference to geojson
-	 * @throws IOException if readFeatureCollection raise an error
-	 */
-	public void readGeoJson(InputStream geojson) throws IOException {
-		GeometryJSON geometryJson  = new GeometryJSON();
-		FeatureJSON featureJson = new FeatureJSON(geometryJson);
-		this.featureCollection = featureJson.readFeatureCollection(geojson);
-	}
-
-	/**
-	 * Create a new Feature Builder for edit each feature and add some attributes
-	 * @param attributes A list of new attribut
-	 */
-	public void createFeatureBuilder(List<String> attributes) {
-		//TODO : Need to be rewrite with newFeature and toGeoJson for a more generique method
-		this.ftBuilder = new SimpleFeatureTypeBuilder();
-		SimpleFeatureType schema = (SimpleFeatureType) this.featureCollection.getSchema();
-		ftBuilder.setName(schema.getName());
-		ftBuilder.setSuperType((SimpleFeatureType) schema.getSuper());
-		ftBuilder.addAll(schema.getAttributeDescriptors());
-		attributes.forEach(attr -> ftBuilder.add(attr, List.class));
-		this.nSchema = ftBuilder.buildFeatureType();
-		this.newFeatures = new ArrayList<>();
+	public String getName(){
+		return this.name;
 	}
 	
 	/**
@@ -95,10 +52,8 @@ public class GeoJson  implements Iterator<Feature>{
 	 * @param feature The feature to add at the FeatureBuilder
 	 * @return The reference to the new (and editable) Feature
 	 */
-	public SimpleFeature newFeature(SimpleFeature feature) {
-		SimpleFeature nF = DataUtilities.reType(nSchema, feature);
-		this.newFeatures.add(nF);
-		return nF;
+	public void addFeature(SimpleFeature feature) {
+		this.newFeatures.add(feature);
 	}
 
 	/**
@@ -107,6 +62,9 @@ public class GeoJson  implements Iterator<Feature>{
 	 * @throws IOException if toString methode doesn't work
 	 */
 	public String toGeoJson() throws IOException {
+		if(this.newFeatures.size() <= 0) {
+			return "";
+		}
 		FeatureCollection<SimpleFeatureType, SimpleFeature> filteredOutputFeatureCollection = DataUtilities.collection(this.newFeatures);
 		FeatureJSON featureJSON = new FeatureJSON();
 		String responseFeature = featureJSON.toString(filteredOutputFeatureCollection);
