@@ -1,0 +1,128 @@
+## LayerList
+
+POST https://localhost:8080/geoserver/ows?service=WPS&version=1.0.0&request=Execute&identifier=gs:AddamnWPS
+<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+  <ows:Identifier>gs:AddamnWPS</ows:Identifier>
+  <wps:DataInputs>
+    <wps:Input>
+      <ows:Identifier>operation</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>getLayerlist</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput>
+      <ows:Identifier>result</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>
+
+
+
+## Instersect
+
+POST https://localhost:8080/geoserver/ows?service=WPS&version=1.0.0&request=Execute&identifier=gs:AddamnWPS
+<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+  <ows:Identifier>gs:AddamnWPS</ows:Identifier>
+  <wps:DataInputs>
+  	<wps:Input>
+      <ows:Identifier>geometry</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData mimeType="application/octet-stream"><![CDATA[{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.940125,42.217826],[8.940125,42.49401],[9.363098,42.49401],[9.363098,42.217826],[8.940125,42.217826]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.857727,42.050717],[8.908539,41.859943],[9.416656,41.996926],[8.857727,42.050717]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[9.044495,41.70697],[8.753357,41.559084],[9.028015,41.554972],[9.011536,41.348999],[9.64325,41.233369],[9.73114,41.476779],[9.5224,41.674136],[9.363098,41.67003],[9.044495,41.70697]]]}}]}]]></wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>operation</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>getIntersection</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+	<wps:Input>
+      <ows:Identifier>selectedLayers</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>communes_cc,aeroports</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput>
+      <ows:Identifier>result</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>
+
+
+## WITHIN (contains completly)
+
+POST https://localhost:8080/geoserver/ows?service=WPS&version=1.0.0&request=Execute&identifier=gs:AddamnWPS
+<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+  <ows:Identifier>gs:AddamnWPS</ows:Identifier>
+  <wps:DataInputs>
+  	<wps:Input>
+      <ows:Identifier>geometry</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData mimeType="application/octet-stream"><![CDATA[{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.940125,42.217826],[8.940125,42.49401],[9.363098,42.49401],[9.363098,42.217826],[8.940125,42.217826]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.857727,42.050717],[8.908539,41.859943],[9.416656,41.996926],[8.857727,42.050717]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[9.044495,41.70697],[8.753357,41.559084],[9.028015,41.554972],[9.011536,41.348999],[9.64325,41.233369],[9.73114,41.476779],[9.5224,41.674136],[9.363098,41.67003],[9.044495,41.70697]]]}}]}]]></wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>operation</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>getIntersection</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>predicat</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>WITHIN</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+	<wps:Input>
+      <ows:Identifier>selectedLayers</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>communes_cc,aeroports</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput>
+      <ows:Identifier>result</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>
+
+
+
+
+## To GeoJSON (initial request)
+## predicat not used for the moment
+
+POST https://localhost:8080/geoserver/ows?service=WPS&version=1.0.0&request=Execute&identifier=gs:AddamnWPS
+<?xml version="1.0" encoding="UTF-8"?><wps:Execute version="1.0.0" service="WPS" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns="http://www.opengis.net/wps/1.0.0" xmlns:wfs="http://www.opengis.net/wfs" xmlns:wps="http://www.opengis.net/wps/1.0.0" xmlns:ows="http://www.opengis.net/ows/1.1" xmlns:gml="http://www.opengis.net/gml" xmlns:ogc="http://www.opengis.net/ogc" xmlns:wcs="http://www.opengis.net/wcs/1.1.1" xmlns:xlink="http://www.w3.org/1999/xlink" xsi:schemaLocation="http://www.opengis.net/wps/1.0.0 http://schemas.opengis.net/wps/1.0.0/wpsAll.xsd">
+  <ows:Identifier>gs:AddamnWPS</ows:Identifier>
+  <wps:DataInputs>
+  	<wps:Input>
+      <ows:Identifier>geometry</ows:Identifier>
+      <wps:Data>
+        <wps:ComplexData mimeType="application/octet-stream"><![CDATA[{"type":"FeatureCollection","features":[{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.940125,42.217826],[8.940125,42.49401],[9.363098,42.49401],[9.363098,42.217826],[8.940125,42.217826]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[8.857727,42.050717],[8.908539,41.859943],[9.416656,41.996926],[8.857727,42.050717]]]}},{"type":"Feature","properties":{},"geometry":{"type":"Polygon","coordinates":[[[9.044495,41.70697],[8.753357,41.559084],[9.028015,41.554972],[9.011536,41.348999],[9.64325,41.233369],[9.73114,41.476779],[9.5224,41.674136],[9.363098,41.67003],[9.044495,41.70697]]]}}]}]]></wps:ComplexData>
+      </wps:Data>
+    </wps:Input>
+    <wps:Input>
+      <ows:Identifier>operation</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>getOrganisme</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+	<wps:Input>
+      <ows:Identifier>selectedLayers</ows:Identifier>
+      <wps:Data>
+        <wps:LiteralData>communes_cc,aeroports</wps:LiteralData>
+      </wps:Data>
+    </wps:Input>
+  </wps:DataInputs>
+  <wps:ResponseForm>
+    <wps:RawDataOutput>
+      <ows:Identifier>result</ows:Identifier>
+    </wps:RawDataOutput>
+  </wps:ResponseForm>
+</wps:Execute>
