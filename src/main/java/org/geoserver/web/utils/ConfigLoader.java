@@ -1,4 +1,4 @@
-package org.geoserver.addamn.wps.config;
+package org.geoserver.web.utils;
 
 import java.io.File;
 import java.io.FileInputStream;
@@ -12,7 +12,6 @@ import org.geoserver.catalog.Catalog;
 import org.geoserver.config.GeoServerDataDirectory;
 import org.geoserver.platform.GeoServerExtensions;
 import com.thoughtworks.xstream.XStream;
-import org.geoserver.addamn.wps.config.LayersConfig;
 
 public class ConfigLoader {
 	/**

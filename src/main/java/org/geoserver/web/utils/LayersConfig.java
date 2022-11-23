@@ -1,4 +1,4 @@
-package org.geoserver.addamn.wps.config;
+package org.geoserver.web.utils;
 
 import java.util.ArrayList;
 import java.util.List;

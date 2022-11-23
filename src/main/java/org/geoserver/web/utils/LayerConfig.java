@@ -1,4 +1,4 @@
-package org.geoserver.addamn.wps.config;
+package org.geoserver.web.utils;
 
 
 public class LayerConfig {

@@ -1,6 +1,8 @@
 # wps-addamn
 WPS script for GeoServer for CGDD/SDES
 
+Version 1.1.0
+
 # Intro
 This GeoServer WPS was create for a project with CGDD/SDES
 It get a geojson as input, get all layers (filter by a config file) who intersect geojson feature and return here organisme key

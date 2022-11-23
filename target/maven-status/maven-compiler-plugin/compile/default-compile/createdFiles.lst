@@ -1,0 +1,9 @@
+org\geoserver\web\utils\GeoJsonLayer.class
+org\geoserver\wpsoddc\wps\OddcWPS.class
+org\geoserver\addamn\wps\config\LayerConfig.class
+org\geoserver\addamn\wps\config\LayersConfig.class
+org\geoserver\web\utils\FeaturesList.class
+org\geoserver\web\utils\GeoJson.class
+org\geoserver\addamn\wps\AddamnWPS.class
+org\geoserver\addamn\wps\config\ConfigLoader.class
+org\geoserver\web\utils\GeoJsonString.class
