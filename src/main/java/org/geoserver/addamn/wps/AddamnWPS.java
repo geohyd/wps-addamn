@@ -1,7 +1,7 @@
 package org.geoserver.addamn.wps;
 
 import org.geotools.coverage.util.IntersectUtils;
-import org.geotools.data.FeatureSource;
+import org.geotools.api.data.FeatureSource;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.filter.text.cql2.CQLException;
@@ -31,16 +31,18 @@ import java.util.Objects;
 import java.util.logging.Level;
 import java.util.logging.Logger;
 import org.locationtech.jts.geom.Geometry;
-import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.type.AttributeDescriptor;
-import org.opengis.feature.type.FeatureType;
-import org.opengis.feature.type.Name;
-import org.opengis.filter.Filter;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
-import org.opengis.referencing.operation.MathTransform;
-import org.opengis.referencing.operation.TransformException;
+import org.geotools.api.feature.Feature;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.type.AttributeDescriptor;
+import org.geotools.api.feature.type.FeatureType;
+import org.geotools.api.feature.type.Name;
+import org.geotools.api.filter.Filter;
+import org.geotools.api.geometry.MismatchedDimensionException;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.referencing.operation.MathTransform;
+import org.geotools.api.referencing.NoSuchAuthorityCodeException;
+import org.geotools.api.referencing.operation.TransformException;
 
 import net.sf.json.JSONArray;
 import net.sf.json.JSONObject;
@@ -80,32 +82,36 @@ public class AddamnWPS implements GeoServerProcess {
 				SimpleFeature newFeature = geojsonUtil.newFeature(geojsonFeature);
 				layers.getAll().forEach(layer -> { // For each Layer in configuration file
 					try {
-						FeatureCollection<? extends FeatureType, ? extends Feature> layerFeatures = getFeatureCollectionByLayerName(this.catalog, layer.getLayerName());
-						try( FeatureIterator<? extends Feature> layerIt = layerFeatures.features() ) {
-							CoordinateReferenceSystem layerCRS = layerFeatures.getSchema().getCoordinateReferenceSystem();
-							MathTransform transform = CRS.findMathTransform(geojsonCRS, layerCRS);
-							Geometry geojsonGeom = (Geometry) geojsonFeature.getDefaultGeometry();
-							// TODO : Reproject only if the CRS are not the same !
-							Geometry geojsonGeomReproj = JTS.transform(geojsonGeom, transform);
-							List<String> organismes = new ArrayList<String>(); // Contains the list of organismes who intersects
-							while(layerIt.hasNext()){ // For each feature of layer
-								// TODO : for a better perf, I think this loop need to be the root loop
-								SimpleFeature layerFeature = (SimpleFeature) layerIt.next();
-								Geometry layerGeom = (Geometry) layerFeature.getDefaultGeometry();
-								if (geojsonGeom != null && geojsonGeom.isValid() && layerGeom != null && layerGeom.isValid()) {
-									if( IntersectUtils.intersects(geojsonGeomReproj, layerGeom) ) {
-										if (!featureHaveAttribute(layerFeature, layer.getOrganismeColumn())) {
-											throw new WPSException("Layer " + layer.getLayerName() 
-											+ " does not have attribute " 
-											+ layer.getOrganismeColumn() 
-											+ ". Please update your config File");
+						if(layer.getOrganismeColumn() != null && !layer.getOrganismeColumn().trim().isEmpty()) {
+							FeatureCollection<? extends FeatureType, ? extends Feature> layerFeatures = getFeatureCollectionByLayerName(this.catalog, layer.getLayerName());
+							try( FeatureIterator<? extends Feature> layerIt = layerFeatures.features() ) {
+								CoordinateReferenceSystem layerCRS = layerFeatures.getSchema().getCoordinateReferenceSystem();
+								MathTransform transform = CRS.findMathTransform(geojsonCRS, layerCRS);
+								Geometry geojsonGeom = (Geometry) geojsonFeature.getDefaultGeometry();
+								// TODO : Reproject only if the CRS are not the same !
+								Geometry geojsonGeomReproj = JTS.transform(geojsonGeom, transform);
+								List<String> organismes = new ArrayList<String>(); // Contains the list of organismes who intersects
+								while(layerIt.hasNext()){ // For each feature of layer
+									// TODO : for a better perf, I think this loop need to be the root loop
+									SimpleFeature layerFeature = (SimpleFeature) layerIt.next();
+									Geometry layerGeom = (Geometry) layerFeature.getDefaultGeometry();
+									if (geojsonGeom != null && geojsonGeom.isValid() && layerGeom != null && layerGeom.isValid()) {
+										if( IntersectUtils.intersects(geojsonGeomReproj, layerGeom) ) {
+											if (!featureHaveAttribute(layerFeature, layer.getOrganismeColumn())) {
+												throw new WPSException("Layer " + layer.getLayerName() 
+												+ " does not have attribute " 
+												+ layer.getOrganismeColumn() 
+												+ ". Please update your config File");
+											}
+											String organisme = (String) layerFeature.getAttribute(layer.getOrganismeColumn()).toString();
+											organismes.add(organisme);
 										}
-										String organisme = (String) layerFeature.getAttribute(layer.getOrganismeColumn()).toString();
-										organismes.add(organisme);
 									}
 								}
+								newFeature.setAttribute(layer.getLayerName(), organismes); // Set the list of intersects organismes
 							}
-							newFeature.setAttribute(layer.getLayerName(), organismes); // Set the list of intersects organismes
+						} else {
+							logger.log(Level.INFO, "Current layer : " + layer.getLayerName() + " don't have organisme column");
 						}
 					} catch (IOException e) {
 						logger.log(Level.SEVERE, "Cannot get features layer source from layerName config", e);
@@ -169,7 +175,7 @@ public class AddamnWPS implements GeoServerProcess {
 			separator = " OR ";
 		};
 		try {
-			logger.log(Level.SEVERE, new String(sb.toString().getBytes(),"UTF-8"));
+			//logger.log(Level.SEVERE, new String(sb.toString().getBytes(),"UTF-8"));
 			return new String(sb.toString().getBytes(),"UTF-8");
 		} catch (UnsupportedEncodingException e) {
 			logger.log(Level.SEVERE, "Cannot parse to UTF-8", e);
@@ -184,7 +190,7 @@ public class AddamnWPS implements GeoServerProcess {
 	 * @return				The String representation of CQL Filter
 	 */
 	public String getCQLFilterAttributs(LayerConfig layerConfig, JSONArray arrayIds) {
-		String separator = "";
+		/*String separator = "";
 		StringBuilder sb = new StringBuilder();
 		Iterator idsIt = arrayIds.iterator();
 		sb.append("(");
@@ -196,7 +202,20 @@ public class AddamnWPS implements GeoServerProcess {
 			separator = " OR ";
 		};
 		sb.append(")");
+		return sb.toString();*/
+		String separator = "";
+		StringBuilder sb = new StringBuilder();
+		Iterator idsIt = arrayIds.iterator();
+		sb.append(layerConfig.getIdColumn());
+		sb.append(" IN (");
+		while(idsIt.hasNext()){ // For each feature of geoJson
+			sb.append(separator);
+			sb.append("'" + idsIt.next() + "'");
+			separator = ", ";
+		};
+		sb.append(")");
 		return sb.toString();
+		
 	}
 
 	/**
@@ -231,20 +250,26 @@ public class AddamnWPS implements GeoServerProcess {
 			try(FeatureIterator<? extends Feature> layerIt = layerFeatures.features()) {
 				JSONArray jsOrgansimeArray = new JSONArray();
 				JSONArray jsIdArray = new JSONArray();
+				JSONArray jsLabelArray = new JSONArray();
 				while(layerIt.hasNext()){ // For each feature of layer
 					SimpleFeature layerFeature = (SimpleFeature) layerIt.next();
-					if (featureHaveAttribute(layerFeature, layerConfig.getOrganismeColumn())) {
+					if (layerConfig.getOrganismeColumn() != null && !layerConfig.getOrganismeColumn().trim().isEmpty() && featureHaveAttribute(layerFeature, layerConfig.getOrganismeColumn())) {
 						jsOrgansimeArray.add(layerFeature.getAttribute(layerConfig.getOrganismeColumn()));
 					}
 					if (featureHaveAttribute(layerFeature, layerConfig.getIdColumn())) {
 						jsIdArray.add(layerFeature.getAttribute(layerConfig.getIdColumn()));
-					}				
+					}
+					if (featureHaveAttribute(layerFeature, layerConfig.getLabelColumn())) {
+						jsLabelArray.add(layerFeature.getAttribute(layerConfig.getLabelColumn()));
+					}
 				}
 				JSONObject paramCQL = new JSONObject();
 				String cqlFilterAttributs = getCQLFilterAttributs(layerConfig, jsIdArray);
 				paramCQL.put("CQL_FILTER", cqlFilterAttributs);
+				//paramCQL.put("CQL_FILTER", cqlFilter);
 				layerRoot.put("params", paramCQL);
-				layerRoot.put("id", jsIdArray);
+				layerRoot.put("ids", jsIdArray);
+				layerRoot.put("labels", jsLabelArray);
 				layerRoot.put("organisme", jsOrgansimeArray);
 				jsonRoot.add(layerRoot);
 			}

@@ -9,19 +9,21 @@ import java.util.Objects;
 
 import org.geoserver.wps.process.RawData;
 import org.geotools.data.DataUtilities;
+import org.geotools.data.geojson.GeoJSONReader;
+import org.geotools.data.geojson.GeoJSONWriter;
+import org.geotools.feature.DefaultFeatureCollection;
 import org.geotools.feature.FeatureCollection;
 import org.geotools.feature.FeatureIterator;
 import org.geotools.feature.simple.SimpleFeatureTypeBuilder;
-import org.geotools.geojson.feature.FeatureJSON;
-import org.geotools.geojson.geom.GeometryJSON;
 import org.geotools.referencing.CRS;
-import org.opengis.feature.Feature;
-import org.opengis.feature.simple.SimpleFeature;
-import org.opengis.feature.simple.SimpleFeatureType;
-import org.opengis.referencing.FactoryException;
-import org.opengis.referencing.NoSuchAuthorityCodeException;
-import org.opengis.referencing.crs.CRSAuthorityFactory;
-import org.opengis.referencing.crs.CoordinateReferenceSystem;
+import org.geotools.api.feature.Feature;
+import org.geotools.api.feature.simple.SimpleFeature;
+import org.geotools.api.feature.simple.SimpleFeatureType;
+import org.geotools.api.referencing.FactoryException;
+import org.geotools.api.referencing.NoSuchAuthorityCodeException;
+import org.geotools.api.referencing.crs.CRSAuthorityFactory;
+import org.geotools.api.referencing.crs.CoordinateReferenceSystem;
+import java.io.ByteArrayOutputStream;
 
 public class GeoJson  implements Iterator<Feature>{
 	/**
@@ -31,11 +33,11 @@ public class GeoJson  implements Iterator<Feature>{
 	 * 		We create new feature for this and need to be re-write
 	 */
 
-	private FeatureCollection featureCollection;
+	private FeatureCollection<?, ?> featureCollection;
 	private SimpleFeatureTypeBuilder ftBuilder;
 	private List<SimpleFeature> newFeatures;
 	private SimpleFeatureType nSchema;
-	private FeatureIterator fIterator = null;
+	private FeatureIterator<?> fIterator = null;
 	
 	@Override
 	public boolean hasNext() {
@@ -69,9 +71,9 @@ public class GeoJson  implements Iterator<Feature>{
 	 * @throws IOException if readFeatureCollection raise an error
 	 */
 	public void readGeoJson(InputStream geojson) throws IOException {
-		GeometryJSON geometryJson  = new GeometryJSON();
-		FeatureJSON featureJson = new FeatureJSON(geometryJson);
-		this.featureCollection = featureJson.readFeatureCollection(geojson);
+		try (GeoJSONReader reader = new GeoJSONReader(geojson)) {
+			this.featureCollection = reader.getFeatures();
+		}
 	}
 
 	/**
@@ -107,10 +109,13 @@ public class GeoJson  implements Iterator<Feature>{
 	 * @throws IOException if toString methode doesn't work
 	 */
 	public String toGeoJson() throws IOException {
-		FeatureCollection<SimpleFeatureType, SimpleFeature> filteredOutputFeatureCollection = DataUtilities.collection(this.newFeatures);
-		FeatureJSON featureJSON = new FeatureJSON();
-		String responseFeature = featureJSON.toString(filteredOutputFeatureCollection);
-		return responseFeature;
+		DefaultFeatureCollection featureCollection = new DefaultFeatureCollection(null, null);
+		((DefaultFeatureCollection) featureCollection).addAll(this.newFeatures);
+		ByteArrayOutputStream outputStream = new ByteArrayOutputStream();
+		try (GeoJSONWriter jsonWriter = new GeoJSONWriter(outputStream)) {
+			jsonWriter.writeFeatureCollection(featureCollection);
+		}
+		return outputStream.toString("UTF-8");
 	}
 
 	/**
