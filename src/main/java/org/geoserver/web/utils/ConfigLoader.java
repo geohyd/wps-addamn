@@ -73,8 +73,8 @@ public class ConfigLoader {
 		xstream.alias("layers", LayersConfig.class);
 		xstream.addImplicitCollection(LayersConfig.class, "layersList");
 		LayersConfig list = new LayersConfig();
-		list.add(new LayerConfig("layerName","organismeColumn","idColumn"));
-		list.add(new LayerConfig("layerName","organismeColumn","idColumn"));
+		list.add(new LayerConfig("layerName","organismeColumn","idColumn", "labelColumn"));
+		list.add(new LayerConfig("layerName","organismeColumn","idColumn", "labelColumn"));
 		String xml = xstream.toXML(list);
 		fw.write(xml);
 		fw.flush();

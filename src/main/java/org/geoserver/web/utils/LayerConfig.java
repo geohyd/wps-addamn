@@ -10,6 +10,7 @@ public class LayerConfig {
 	private String layerTitle = "";
 	private String organismeColumn;
 	private String idColumn;
+	private String labelColumn;
 	private String geomColumnName;
 	//typeNames
 	
@@ -18,10 +19,11 @@ public class LayerConfig {
 	 * @param layerName	The name of Layer (same as name of layer in geoserver)
 	 * @param organismeColumn	The organisme column name for this layer
 	 */
-	protected LayerConfig(String name, String organismeColumn, String idColumn) {
+	protected LayerConfig(String name, String organismeColumn, String idColumn, String labelColumn) {
 		this.layerName = layerName;
 		this.organismeColumn = organismeColumn;
 		this.idColumn = idColumn;
+		this.labelColumn= labelColumn; 
 	}
 	
 	/**
@@ -66,10 +68,18 @@ public class LayerConfig {
 	}
 	
 	/**
-	 * Return the Organisme column name
-	 * @return String organismeColumn
+	 * Return the id column name
+	 * @return String idColumn
 	 */
 	public String getIdColumn() {
 		return this.idColumn;
+	}
+	
+	/**
+	 * Return the label column name
+	 * @return String labelColumn
+	 */
+	public String getLabelColumn() {
+		return this.labelColumn;
 	}
 }
