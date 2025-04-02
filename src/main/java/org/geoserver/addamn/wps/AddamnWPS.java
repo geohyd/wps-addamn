@@ -277,11 +277,52 @@ public class AddamnWPS implements GeoServerProcess {
 		return jsonRoot.toString();
 	}
 
+	private boolean isLayerValid(LayerConfig layer){
+		if (this.catalog.getLayerByName(layer.getLayerName()) == null) {
+			logger.log(Level.WARNING, "Layer '" + layer.getLayerName() + "' not found in GeoServer catalog. It will be removed from the config.");
+			return false;
+		}
+		// Récupération du FeatureCollection
+		FeatureCollection<? extends FeatureType, ? extends Feature> layerFeatures;
+		try {
+			layerFeatures = getFeatureCollectionByLayerName(this.catalog, layer.getLayerName());
+		} catch (IOException e) {
+			logger.log(Level.WARNING, "Layer '" + layer.getLayerName() + "' cannot getFeatureCollectionByLayerName. It will be removed from the config");
+			return false;
+		}
+		try (FeatureIterator<? extends Feature> layerIt = layerFeatures.features()) {
+			if (!layerIt.hasNext()) {
+				logger.log(Level.WARNING, "Layer '" + layer.getLayerName() + "' has no features. It will be removed from the config.");
+				return false;
+			}
+			SimpleFeature feature = (SimpleFeature) layerIt.next();
+			// Vérifie que les colonnes id et label existent
+			boolean hasId = featureHaveAttribute(feature, layer.getIdColumn());
+			boolean hasLabel = featureHaveAttribute(feature, layer.getLabelColumn());
+			if (!hasId || !hasLabel) {
+				logger.log(Level.WARNING, "Layer '" + layer.getLayerName() + "' is missing required attributes (id: " + layer.getIdColumn() + ", label: " + layer.getLabelColumn() + "). It will be removed from the config.");
+				return false;
+			}
+		}
+		return true;
+	}
+
 	public LayersConfig getLayersList() {
 		LayersConfig layers;
 		try {
 			layers = ConfigLoader.load();
-			layers.getAll().forEach(layer -> {
+			List<LayerConfig> validLayers = new ArrayList<>();
+			for (LayerConfig layer : layers.getAll()) {
+				if (this.isLayerValid(layer)) {
+					validLayers.add(layer);
+				} else {
+					logger.log(Level.WARNING, "Layer '" + layer.getLayerName() + " is not a valid layer.");
+				}
+			}
+			layers.getAll().clear();
+			layers.getAll().addAll(validLayers);
+			
+			for (LayerConfig layer : layers.getAll()) {
 				layer.setLayerTitle(this.catalog.getLayerByName(layer.getLayerName()).getTitle());
 				try {
 					FeatureCollection<? extends FeatureType, ? extends Feature> layerFeatures = getFeatureCollectionByLayerName(this.catalog, layer.getLayerName());
@@ -293,7 +334,7 @@ public class AddamnWPS implements GeoServerProcess {
 					logger.log(Level.SEVERE, "Cannot get the geom column Name for layer : " + layer.getLayerName(), e);
 					throw new WPSException("Cannot get the geom column Name for layer : " + layer.getLayerName(), e);
 				}
-			});
+			};
 		} catch (IOException e) {
 			logger.log(Level.SEVERE, "Cannot load config file", e);
 			throw new WPSException("Cannot load config file", e);
